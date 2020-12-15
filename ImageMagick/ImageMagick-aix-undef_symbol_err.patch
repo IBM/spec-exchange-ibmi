@@ -1,0 +1,13 @@
+--- ./MagickCore/locale.c_orig	2019-08-20 07:42:05 +0000
++++ ./MagickCore/locale.c	2019-08-20 02:55:22 +0000
+@@ -1692,7 +1692,9 @@
+ {
+   if (locale_semaphore == (SemaphoreInfo *) NULL)
+     locale_semaphore=AcquireSemaphoreInfo();
++#if defined(MAGICKCORE_LOCALE_SUPPORT)
+   (void) AcquireCLocale();
++#endif
+   return(MagickTrue);
+ }
+ 
+

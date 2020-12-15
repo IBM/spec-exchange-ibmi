@@ -1,0 +1,69 @@
+From 21fc28410866f13985cd08281a741a6e80d7e982 Mon Sep 17 00:00:00 2001
+From: Calvin Buckley <calvin@cmpct.info>
+Date: Fri, 24 Jul 2020 20:37:03 +0200
+Subject: [PATCH] AIX/PASE
+
+Limitations: No .a archive built, nor does it have a versioned soname.
+
+Of course, the only "sane" way to build that is with libtool, and,
+well...
+---
+ Makefile | 11 +++++++++++
+ shr.exp  | 23 +++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
+ create mode 100644 shr.exp
+
+diff --git a/Makefile b/Makefile
+index 588ff46..8b46cc8 100644
+--- a/Makefile
++++ b/Makefile
+@@ -109,6 +109,17 @@ ifeq ($(KERNEL_NAME), SunOS)
+ 	LIB_CFLAGS := -shared -fPIC
+ 	PC_EXTRA_LIBS ?=
+ endif
++# XXX: rpath isn't right for AIX, but who cares about AIX?
++# XXX: No versioning - this is just ridiculous to deal w/o libtool.
++ifeq ($(KERNEL_NAME), $(filter $(KERNEL_NAME),OS400 AIX))
++	CC := gcc
++	CFLAGS += -D_REENTRANT
++	LIB_EXT := so
++	LIB_CFLAGS := -shared -fPIC
++	SO_LDFLAGS := -Wl,-bE:shr.exp,-blibpath:/QOpenSys/pkgs/lib:/QOpenSys/usr/lib
++	PC_EXTRA_LIBS ?=
++endif
++
+ 
+ ifeq ($(KERNEL_NAME), Linux)
+ ifeq ($(CC), clang)
+diff --git a/shr.exp b/shr.exp
+new file mode 100644
+index 0000000..f608ac1
+--- /dev/null
++++ b/shr.exp
+@@ -0,0 +1,23 @@
++argon2_type2string
++argon2_ctx
++argon2i_hash_encoded
++argon2i_hash_raw
++argon2d_hash_encoded
++argon2d_hash_raw
++argon2id_hash_encoded
++argon2id_hash_raw
++argon2_hash
++argon2i_verify
++argon2d_verify
++argon2id_verify
++argon2_verify
++argon2d_ctx
++argon2i_ctx
++argon2id_ctx
++argon2d_verify_ctx
++argon2i_verify_ctx
++argon2id_verify_ctx
++argon2_verify_ctx
++argon2_error_message
++argon2_encodedlen
++
+-- 
+2.26.2
+
