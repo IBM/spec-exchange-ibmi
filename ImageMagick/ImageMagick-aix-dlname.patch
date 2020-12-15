@@ -1,0 +1,11 @@
+--- ./config/ltmain.sh_orig	2019-09-09 08:13:48 +0000
++++ ./config/ltmain.sh	2019-09-09 08:26:47 +0000
+@@ -10070,7 +10070,7 @@
+ 	# If -module or -export-dynamic was specified, set the dlname.
+ 	if test yes = "$module" || test yes = "$export_dynamic"; then
+ 	  # On all known operating systems, these are identical.
+-	  dlname=$soname
++	  dlname=$realname\(${soname}\)
+ 	fi
+       fi
+       ;;
