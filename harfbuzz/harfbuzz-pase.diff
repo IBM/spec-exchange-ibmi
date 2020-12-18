@@ -1,0 +1,90 @@
+diff --git a/src/harfbuzz-icu.pc.in b/src/harfbuzz-icu.pc.in
+index 949869a..486e928 100644
+--- a/src/harfbuzz-icu.pc.in
++++ b/src/harfbuzz-icu.pc.in
+@@ -8,6 +8,9 @@ Description: HarfBuzz text shaping library ICU integration
+ Version: %VERSION%
+ 
+ Requires: harfbuzz
+-Requires.private: icu-uc
+-Libs: -L${libdir} -lharfbuzz-icu
+-Cflags: -I${includedir}/harfbuzz
++# Hacked up for using AIX/PASE system ICU
++#Requires.private: icu-uc
++#Libs: -L${libdir} -lharfbuzz-icu
++Libs: -L/usr/icu4c/lib -licui18n -licuuc -licudata -L${libdir} -lharfbuzz-icu
++#Cflags: -I${includedir}/harfbuzz
++Cflags: -I/usr/icu4c/include -I${includedir}/harfbuzz
+diff --git a/src/hb-icu.cc b/src/hb-icu.cc
+index e98908d..219e2ea 100644
+--- a/src/hb-icu.cc
++++ b/src/hb-icu.cc
+@@ -36,7 +36,7 @@
+ #include "hb-machinery.hh"
+ 
+ #include <unicode/uchar.h>
+-#include <unicode/unorm2.h>
++#include <unicode/unorm.h>
+ #include <unicode/ustring.h>
+ #include <unicode/utf16.h>
+ #include <unicode/uversion.h>
+@@ -194,7 +194,7 @@ hb_icu_unicode_compose (hb_unicode_funcs_t *ufuncs HB_UNUSED,
+   if (err) return false;
+ 
+   icu_err = U_ZERO_ERROR;
+-  len = unorm2_normalize (unorm2_getNFCInstance (&icu_err), utf16, len, normalized, ARRAY_LENGTH (normalized), &icu_err);
++  len = unorm_normalize (utf16, len, UNORM_NFC, 0, normalized, ARRAY_LENGTH (normalized), &icu_err);
+   if (U_FAILURE (icu_err))
+     return false;
+   if (u_countChar32 (normalized, len) == 1) {
+@@ -256,7 +256,7 @@ hb_icu_unicode_decompose (hb_unicode_funcs_t *ufuncs HB_UNUSED,
+   if (err) return false;
+ 
+   icu_err = U_ZERO_ERROR;
+-  len = unorm2_normalize (unorm2_getNFDInstance (&icu_err), utf16, len, normalized, ARRAY_LENGTH (normalized), &icu_err);
++  len = unorm_normalize (utf16, len, UNORM_NFD, 0, normalized, ARRAY_LENGTH (normalized), &icu_err);
+   if (U_FAILURE (icu_err))
+     return false;
+ 
+@@ -276,7 +276,7 @@ hb_icu_unicode_decompose (hb_unicode_funcs_t *ufuncs HB_UNUSED,
+      * the second part :-(. */
+     UChar recomposed[20];
+     icu_err = U_ZERO_ERROR;
+-    unorm2_normalize (unorm2_getNFCInstance (&icu_err), normalized, len, recomposed, ARRAY_LENGTH (recomposed), &icu_err);
++    unorm_normalize (normalized, len, UNORM_NFC, 0, recomposed, ARRAY_LENGTH (recomposed), &icu_err);
+     if (U_FAILURE (icu_err))
+       return false;
+     hb_codepoint_t c;
+@@ -292,7 +292,7 @@ hb_icu_unicode_decompose (hb_unicode_funcs_t *ufuncs HB_UNUSED,
+     HB_ICU_STMT (U16_PREV_UNSAFE (normalized, len, *b)); /* Changes len in-place. */
+     UChar recomposed[18 * 2];
+     icu_err = U_ZERO_ERROR;
+-    len = unorm2_normalize (unorm2_getNFCInstance (&icu_err), normalized, len, recomposed, ARRAY_LENGTH (recomposed), &icu_err);
++    len = unorm_normalize (normalized, len, UNORM_NFC, 0, recomposed, ARRAY_LENGTH (recomposed), &icu_err);
+     if (U_FAILURE (icu_err))
+       return false;
+     /* We expect that recomposed has exactly one character now. */
+diff --git a/src/hb-ot-face-table-list.hh b/src/hb-ot-face-table-list.hh
+index 9799edd..15fdd84 100644
+--- a/src/hb-ot-face-table-list.hh
++++ b/src/hb-ot-face-table-list.hh
+@@ -60,6 +60,7 @@ HB_OT_ACCELERATOR (OT, post)
+ HB_OT_ACCELERATOR (OT, name)
+ #endif
+ #ifndef HB_NO_STAT
++#undef STAT
+ HB_OT_TABLE (OT, STAT)
+ #endif
+ #ifndef HB_NO_META
+diff --git a/src/hb-ot-stat-table.hh b/src/hb-ot-stat-table.hh
+index 98bdfa3..a13c59f 100644
+--- a/src/hb-ot-stat-table.hh
++++ b/src/hb-ot-stat-table.hh
+@@ -245,6 +245,7 @@ struct StatAxisRecord
+   DEFINE_SIZE_STATIC (8);
+ };
+ 
++#undef STAT
+ struct STAT
+ {
+   static constexpr hb_tag_t tableTag = HB_OT_TAG_STAT;
