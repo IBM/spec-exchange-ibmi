@@ -1,0 +1,11 @@
+--- lzo-2.10-orig/autoconf/local.m4	2017-03-01 14:54:14 +0000
++++ lzo-2.10/autoconf/local.m4	2019-03-25 20:32:49 +0000
+@@ -10,7 +10,7 @@
+ ])
+ 
+ AC_DEFUN([mfx_ACC_CHECK_FUNCS], [
+-AC_CHECK_FUNCS(access alloca atexit atoi atol chmod chown clock_getcpuclockid clock_getres clock_gettime ctime difftime fstat getenv getpagesize getrusage gettimeofday gmtime isatty localtime longjmp lstat memcmp memcpy memmove memset mkdir mktime mmap mprotect munmap qsort raise rmdir setjmp signal snprintf strcasecmp strchr strdup strerror strftime stricmp strncasecmp strnicmp strrchr strstr time umask utime vsnprintf)
++AC_CHECK_FUNCS(access alloca atexit atoi atol chmod chown clock_getcpuclockid clock_getres ctime difftime fstat getenv getpagesize getrusage gettimeofday gmtime isatty localtime longjmp lstat memcmp memcpy memmove memset mkdir mktime mmap mprotect munmap qsort raise rmdir setjmp signal snprintf strcasecmp strchr strdup strerror strftime stricmp strncasecmp strnicmp strrchr strstr time umask utime vsnprintf)
+ ])
+ 
+ AC_DEFUN([mfx_ACC_CHECK_SIZEOF], [
